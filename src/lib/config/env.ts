@@ -3,8 +3,17 @@
 const emptyToUndefined = (value: unknown) =>
     typeof value === "string" && value.trim() === "" ? undefined : value;
 
+const normalizeNodeEnv = (value: unknown): "development" | "test" | "production" => {
+    if (typeof value !== "string") return "development";
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "development" || normalized === "test" || normalized === "production") {
+        return normalized;
+    }
+    return "production";
+};
+
 const envSchema = z.object({
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    NODE_ENV: z.preprocess(normalizeNodeEnv, z.enum(["development", "test", "production"])),
     NEXT_PUBLIC_API_URL: z.string().optional(),
     JWT_SECRET: z.string().optional(),
     DATABASE_URL: z.string().min(1).optional(),
